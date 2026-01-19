@@ -1,0 +1,18 @@
+apiVersion: v2
+name: fastschema
+description: A Helm chart for FastSchema with HA defaults, resource management, and comprehensive configuration
+type: application
+version: 0.1.0
+appVersion: "latest"
+icon: https://fastschema.com/favicon.ico
+keywords:
+  - fastschema
+  - backend
+  - api
+  - database
+maintainers:
+  - name: k8sforge
+home: https://github.com/k8sforge/fastschema-chart
+sources:
+  - https://github.com/fastschema/fastschema
+  - https://github.com/k8sforge/fastschema-chart

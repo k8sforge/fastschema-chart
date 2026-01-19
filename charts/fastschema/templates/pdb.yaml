@@ -1,0 +1,18 @@
+{{- if and .Values.podDisruptionBudget.enabled (gt (.Values.replicaCount | int) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "fastschema.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fastschema.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else }}
+  minAvailable: {{ sub (.Values.replicaCount | int) 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "fastschema.selectorLabels" . | nindent 6 }}
+{{- end }}

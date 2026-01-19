@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fastschema.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "fastschema.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fastschema.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fastschema.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: fastschema
+          image: "ghcr.io/fastschema/fastschema:latest"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fastschema.fullname" . }}-app-key
+                  key: app-key
+            - name: APP_PORT
+              value: {{ .Values.appPort | quote }}
+            - name: APP_BASE_URL
+              value: {{ .Values.appBaseUrl | quote }}
+            - name: APP_DASH_URL
+              value: {{ .Values.appDashUrl | quote }}
+            - name: APP_API_BASE_NAME
+              value: {{ .Values.appApiBaseName | quote }}
+            - name: DB_DRIVER
+              value: {{ .Values.database.driver | quote }}
+            {{- if .Values.database.name }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            {{- end }}
+            {{- if .Values.database.host }}
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            {{- end }}
+            {{- if .Values.database.port }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | quote }}
+            {{- end }}
+            {{- if .Values.database.user }}
+            - name: DB_USER
+              value: {{ .Values.database.user | quote }}
+            {{- end }}
+            {{- if .Values.database.existingSecret }}
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretPasswordKey }}
+            {{- else if .Values.database.password }}
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fastschema.fullname" . }}-db
+                  key: password
+            {{- end }}
+            {{- if .Values.database.disableForeignKeys }}
+            - name: DB_DISABLE_FOREIGN_KEYS
+              value: {{ .Values.database.disableForeignKeys | quote }}
+            {{- end }}
+            {{- if include "fastschema.authJson" . }}
+            - name: AUTH
+              value: {{ include "fastschema.authJson" . | quote }}
+            {{- end }}
+            {{- if include "fastschema.storageJson" . }}
+            - name: STORAGE
+              value: {{ include "fastschema.storageJson" . | quote }}
+            {{- end }}
+            {{- if include "fastschema.mailJson" . }}
+            - name: MAIL
+              value: {{ include "fastschema.mailJson" . | quote }}
+            {{- end }}
+          {{- if .Values.healthCheck.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.healthCheck.path }}
+              port: {{ .Values.healthCheck.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.healthCheck.path }}
+              port: {{ .Values.healthCheck.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+          {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "fastschema.fullname" . }}-data
+      {{- end }}
