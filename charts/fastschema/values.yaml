@@ -1,0 +1,120 @@
+# Default values for fastschema chart
+# This chart provides a deployment of FastSchema
+
+# High Availability Configuration
+replicaCount: 1
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - fastschema
+          topologyKey: kubernetes.io/hostname
+
+# Resource Management
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Health Checks
+healthCheck:
+  enabled: true
+  path: "/"
+  port: 8000
+
+# FastSchema Configuration
+appKey: ""  # Required: 32-character string. Auto-generated if empty
+appPort: 8000
+appBaseUrl: "http://localhost:8000"
+appDashUrl: "http://localhost:8000/dash"
+appApiBaseName: "api"
+
+# Database Configuration
+database:
+  driver: "sqlite"  # sqlite, mysql, pgx
+  name: ""
+  host: "localhost"
+  port: ""
+  user: ""
+  password: ""  # Via secret if not using existingSecret
+  disableForeignKeys: false
+  existingSecret: ""
+  existingSecretPasswordKey: "password"
+
+# Auth Configuration (JSON string format)
+auth:
+  enabled: false
+  enabledProviders:
+    - "local"
+  providers:
+    local:
+      activation_method: "email"
+      activation_url: ""
+      recovery_url: ""
+    github:
+      client_id: ""
+      client_secret: ""
+    google:
+      client_id: ""
+      client_secret: ""
+    twitter:
+      consumer_key: ""
+      consumer_secret: ""
+
+# Storage Configuration (JSON string format)
+storage:
+  defaultDisk: "public"
+  disks:
+    - name: "public"
+      driver: "local"
+      root: "./public"
+      public_path: "/files"
+      base_url: "http://localhost:8000/files"
+
+# Mail Configuration (JSON string format)
+mail:
+  senderName: ""
+  senderMail: ""
+  defaultClient: ""
+  clients: []
+
+# Persistence
+persistence:
+  enabled: true
+  type: "pvc"
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  size: "10Gi"
+  mountPath: "/fastschema/data"
+
+# Service
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+# Ingress (disabled by default - Terraform handles ALB)
+ingress:
+  enabled: false
+
+# Monitoring
+monitoring:
+  serviceMonitor:
+    enabled: false
+    interval: "30s"
+    labels: {}
