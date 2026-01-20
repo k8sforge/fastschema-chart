@@ -15,6 +15,10 @@ spec:
       labels:
         {{- include "fastschema.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.persistence.enabled }}
+      securityContext:
+        fsGroup: 1000
+      {{- end }}
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
