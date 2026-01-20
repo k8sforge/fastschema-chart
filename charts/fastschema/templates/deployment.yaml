@@ -15,9 +15,9 @@ spec:
       labels:
         {{- include "fastschema.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if .Values.persistence.enabled }}
+      {{- if and .Values.persistence.enabled .Values.podSecurityContext }}
       securityContext:
-        fsGroup: 1000
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
@@ -93,6 +93,22 @@ spec:
               value: {{ include "fastschema.mailJson" . | quote }}
             {{- end }}
           {{- if .Values.healthCheck.enabled }}
+          {{- if .Values.healthCheck.useTcp }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.healthCheck.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.healthCheck.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          {{- else }}
           livenessProbe:
             httpGet:
               path: {{ .Values.healthCheck.path }}
@@ -110,6 +126,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- if .Values.persistence.enabled }}
@@ -117,11 +134,10 @@ spec:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
           {{- end }}
+          {{- if .Values.securityContext }}
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
       {{- if .Values.persistence.enabled }}
       volumes:
         - name: data
