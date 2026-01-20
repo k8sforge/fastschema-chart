@@ -2,7 +2,7 @@ apiVersion: v2
 name: fastschema
 description: A Helm chart for FastSchema with HA defaults, resource management, and comprehensive configuration
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "latest"
 icon: https://fastschema.com/favicon.ico
 keywords:
