@@ -30,9 +30,24 @@ resources:
     memory: "512Mi"
     cpu: "500m"
 
+# Security Context
+# Pod-level security context for volume permissions
+podSecurityContext:
+  fsGroup: 1000
+
+# Container-level security context
+securityContext:
+  runAsUser: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
 # Health Checks
+# Use TCP probe since FastSchema doesn't have a public health endpoint
+# TCP probe checks if the server is listening on the port (more reliable than HTTP)
 healthCheck:
   enabled: true
+  useTcp: true
   path: "/"
   port: 8000
 
