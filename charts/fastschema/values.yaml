@@ -1,6 +1,12 @@
 # Default values for fastschema chart
 # This chart provides a deployment of FastSchema
 
+# Image configuration
+image:
+  repository: ghcr.io/fastschema/fastschema
+  tag: ""  # defaults to Chart.appVersion
+  pullPolicy: IfNotPresent
+
 # High Availability Configuration
 replicaCount: 1
 
@@ -123,9 +129,17 @@ service:
   port: 8000
   targetPort: 8000
 
-# Ingress (disabled by default - Terraform handles ALB)
+# Ingress (disabled by default - Terraform/overlay handles ALB)
 ingress:
   enabled: false
+  ingressClassName: ""
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  annotations: {}
+  tls: []
 
 # Monitoring
 monitoring:
