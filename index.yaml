@@ -2,6 +2,29 @@ apiVersion: v1
 entries:
   fastschema:
   - apiVersion: v2
+    appVersion: 0.9.6
+    created: "2026-03-01T00:29:12.849017065Z"
+    description: A Helm chart for FastSchema with HA defaults, resource management,
+      and comprehensive configuration
+    digest: f70b7b419b663a2261f296c8cf70921fa86d826c3da023effb5b22454a39b0ea
+    home: https://github.com/k8sforge/fastschema-chart
+    icon: https://fastschema.com/favicon.ico
+    keywords:
+    - fastschema
+    - backend
+    - api
+    - database
+    maintainers:
+    - name: k8sforge
+    name: fastschema
+    sources:
+    - https://github.com/fastschema/fastschema
+    - https://github.com/k8sforge/fastschema-chart
+    type: application
+    urls:
+    - https://github.com/k8sforge/fastschema-chart/releases/download/fastschema-0.1.4/fastschema-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
     appVersion: latest
     created: "2026-01-20T08:21:12.13254378Z"
     description: A Helm chart for FastSchema with HA defaults, resource management,
@@ -70,4 +93,4 @@ entries:
     urls:
     - https://github.com/k8sforge/fastschema-chart/releases/download/fastschema-0.1.1/fastschema-0.1.1.tgz
     version: 0.1.1
-generated: "2026-01-20T08:21:12.132556003Z"
+generated: "2026-03-01T00:29:12.849032464Z"
